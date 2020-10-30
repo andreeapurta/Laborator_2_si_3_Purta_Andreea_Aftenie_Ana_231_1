@@ -19,7 +19,7 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
             string cuvIntrare = "";
             int productionLength;
             int linesTA = 0, colTA = 0, linesTS = 0, colTS = 0;
-            int indexLine = 0;
+            int indexLine = 1 ;
             int indexCol = 0;
             string value = "";
             //citire fisier
@@ -90,47 +90,48 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
             Console.WriteLine("Amu afisam cuvant intrari" + cuvIntrare);
 
             //initializare stiva cu $ si 0
-            stack.Push('0');
             stack.Push('$');
-        
-            for (int i = 0; i < cuvIntrare.Length; i++)
+            stack.Push(0);
+
+            bool acc = false;
+           while(!acc)
             {
-
-                indexLine = 0;
-                indexCol = cuvIntrare.IndexOf(cuvIntrare[0]);
-                value = TA[indexLine, indexCol];
-
-                if (value[0] == 'd')
+                ///daca e int
+               if(stack.Peek().GetType() == typeof(int))
                 {
-                    stack.Push(cuvIntrare[0]);
-                    stack.Push(value[1]);
+                    indexLine = (int)(stack.Peek());
+                    indexCol = terminals.IndexOf(cuvIntrare[0]);
+                    value = TA[indexLine, indexCol];
+
+                    if (value[0] == 'd')
+                    {
+                        stack.Push(cuvIntrare[0]);
+                        stack.Push(int.Parse(value[1].ToString()));
+                        cuvIntrare = cuvIntrare.Substring(1, cuvIntrare.Length-1);
+                    }
+
+                    else if (value[0] == 'r')
+                    {
+                        stack.Pop();
+                        stack.Pop();
+                        stack.Push(production[int.Parse(value[1].ToString())].Item1);
+                        stack.Push(TS[indexLine, nonterminals.IndexOf(production[value[1]].Item1)]);
+                        Console.WriteLine("Amu Iar stiva");
+                        foreach (var item in stack)
+                        { Console.Write(item + ","); }
+                    }                   
                 }
 
-                else if (value[0] == 'r')
-                {
-                    stack.Pop();
-                    stack.Pop();
-                    stack.Push(production[value[1]].Item1);
-                    stack.Push(TS[indexLine, nonterminals.IndexOf(production[value[1]].Item1)]);
-                    Console.WriteLine("Amu Iar stiva");
-                    foreach (var item in stack)
-                    { Console.Write(item + ","); }
-                }
-         
-                else if (value == "acc")
-                {
-                    Console.WriteLine("Acceptare");
-                    break;
-                }
+               //daca e string
                 else
                 {
-                    Console.WriteLine("Eroare");
-                    break;
+                    var auxCol = nonterminals.IndexOf((char)stack.Pop());                 
+                    int action =Int32.Parse(TS[(int)stack.Peek(), auxCol]);
+                    stack.Push(nonterminals[auxCol]);
+                    stack.Push(action);
                 }
 
-            }
-           
-
+            }           
         }
     }
 }
