@@ -1,12 +1,13 @@
 ﻿ETF
 a+*()$
-6
+7
 E E+T
 E T
 T T*F
 T F
 F (E)
 F a
+F -(E)
 12
 6
 d5 0 0 d4 0 0

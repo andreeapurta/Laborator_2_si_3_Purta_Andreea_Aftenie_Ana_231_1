@@ -2,11 +2,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
 {
     class Program
     {
+        public static string Reverse(string s)
+        {
+            char[] charArray = s.ToCharArray();
+            Array.Reverse(charArray);
+            return new string(charArray);
+        }
+
         static void Main(string[] args)
         {
             Stack stack = new Stack();
@@ -15,7 +23,6 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
             var production = new List<(string, string)>();
             string[,] TS = new string[100, 100];
             string[,] TA = new string[100, 100];
-            string sirInitial = "";
             string cuvIntrare = "";
             int productionLength;
             int linesTA = 0, colTA = 0, linesTS = 0, colTS = 0;
@@ -31,8 +38,10 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
                 Int32.TryParse(fisier.ReadLine(), out productionLength);
                 for (int i = 0; i < productionLength; i++)
                 {
-                    sirInitial += fisier.ReadLine();
+                    string[] sirImpartit = fisier.ReadLine().Split(" ");
+                    production.Add((sirImpartit[0], sirImpartit[1]));
                 }
+
                 Int32.TryParse(fisier.ReadLine(), out linesTA);
                 Int32.TryParse(fisier.ReadLine(), out colTA);
 
@@ -87,7 +96,7 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
                 }
                 Console.WriteLine();
             }
-            Console.WriteLine("Amu afisam cuvant intrari" + cuvIntrare);
+            Console.WriteLine("Amu afisam cuvant intrari " + cuvIntrare);
 
             //initializare stiva cu $ si 0
             stack.Push('$');
@@ -102,6 +111,18 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
                     indexLine = (int)(stack.Peek());
                     indexCol = terminals.IndexOf(cuvIntrare[0]);
                     value = TA[indexLine, indexCol];
+                    
+                    if(value.Equals("acc"))
+                    {
+                        Console.WriteLine("Amu apartine gramaticii!! :)");
+                        acc = true;
+                    }
+
+                    if (value.Equals("0"))
+                    {
+                        Console.WriteLine("Amu Nu apartine gramaticii! :(");
+                        return;
+                    }
 
                     if (value[0] == 'd')
                     {
@@ -112,13 +133,28 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
 
                     else if (value[0] == 'r')
                     {
-                        stack.Pop();
-                        stack.Pop();
-                        stack.Push(production[int.Parse(value[1].ToString())].Item1);
-                        stack.Push(TS[indexLine, nonterminals.IndexOf(production[value[1]].Item1)]);
-                        Console.WriteLine("Amu Iar stiva");
-                        foreach (var item in stack)
-                        { Console.Write(item + ","); }
+                        string auxStack = "";
+                        foreach (var item in stack.ToArray())
+                        {
+                            stack.Pop();
+                            if (item.GetType() == typeof(char) || item.GetType() == typeof(string))
+                            {
+                                auxStack += item;                              
+                                var altavar = production[int.Parse(value[1].ToString()) - 1].Item2;
+                                if (Reverse(auxStack).Equals(altavar))
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                        var peek = (int)(stack.Peek());
+                        stack.Push(production[int.Parse(value[1].ToString())-1].Item1);
+                        var auxVar = nonterminals.IndexOf(stack.Peek().ToString());
+                        stack.Push(int.Parse(TS[peek, auxVar]));
+                       
+                        //Console.WriteLine("Amu  stiva");
+                        //foreach (var item in stack)
+                        //{ Console.Write(item + ","); }
                     }                   
                 }
 
@@ -131,7 +167,8 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
                     stack.Push(action);
                 }
 
-            }           
+            }
+
         }
     }
 }
