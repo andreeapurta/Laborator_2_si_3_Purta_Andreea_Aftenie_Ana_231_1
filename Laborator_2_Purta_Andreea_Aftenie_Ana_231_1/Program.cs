@@ -26,11 +26,11 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
             string cuvIntrare = "";
             int productionLength;
             int linesTA = 0, colTA = 0, linesTS = 0, colTS = 0;
-            int indexLine = 1 ;
+            int indexLine = 1;
             int indexCol = 0;
             string value = "";
-            //citire fisier
 
+            //citire fisier
             using (StreamReader fisier = new StreamReader(@"C:\Users\Andreea Purta\Desktop\Laborator_2_Purta_Andreea_Aftenie_Ana_231_1\Laborator_2_Purta_Andreea_Aftenie_Ana_231_1\textFile.txt"))
             {
                 nonterminals += fisier.ReadLine();
@@ -67,13 +67,10 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
                         TS[i, j] = termsTS[j];
                     }
                 }
-
                 cuvIntrare += fisier.ReadLine();
-
             }
 
             //afisari
-
             Console.WriteLine(nonterminals);
             Console.WriteLine(terminals);
             Console.WriteLine("Amu afisam matricea TA");
@@ -86,6 +83,7 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
                 }
                 Console.WriteLine();
             }
+
             Console.WriteLine("Amu afisam matricea TS");
             for (int i = 0; i < linesTS; i++)
             {
@@ -103,16 +101,16 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
             stack.Push(0);
 
             bool acc = false;
-           while(!acc)
+            while (!acc)
             {
                 ///daca e int
-               if(stack.Peek().GetType() == typeof(int))
+                if (stack.Peek().GetType() == typeof(int))
                 {
                     indexLine = (int)(stack.Peek());
                     indexCol = terminals.IndexOf(cuvIntrare[0]);
                     value = TA[indexLine, indexCol];
-                    
-                    if(value.Equals("acc"))
+
+                    if (value.Equals("acc"))
                     {
                         Console.WriteLine("Amu apartine gramaticii!! :)");
                         acc = true;
@@ -128,41 +126,43 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
                     {
                         stack.Push(cuvIntrare[0]);
                         stack.Push(int.Parse(value[1].ToString()));
-                        cuvIntrare = cuvIntrare.Substring(1, cuvIntrare.Length-1);
+                        cuvIntrare = cuvIntrare.Substring(1, cuvIntrare.Length - 1);
                     }
 
                     else if (value[0] == 'r')
                     {
                         string auxStack = "";
+                        //parcurgem stiva (Care am facut o array)
                         foreach (var item in stack.ToArray())
                         {
                             stack.Pop();
+                            //daca in stiva e caracter atunci adaug in sir
                             if (item.GetType() == typeof(char) || item.GetType() == typeof(string))
                             {
-                                auxStack += item;                              
+                                auxStack += item;
                                 var altavar = production[int.Parse(value[1].ToString()) - 1].Item2;
+                                //daca am gasit in stiva elementul de la care se face reducere se opreste daca nu tot scoate din stiva
                                 if (Reverse(auxStack).Equals(altavar))
                                 {
                                     break;
                                 }
                             }
                         }
+
                         var peek = (int)(stack.Peek());
-                        stack.Push(production[int.Parse(value[1].ToString())-1].Item1);
+                        stack.Push(production[int.Parse(value[1].ToString()) - 1].Item1);
                         var auxVar = nonterminals.IndexOf(stack.Peek().ToString());
                         stack.Push(int.Parse(TS[peek, auxVar]));
-                       
-                        //Console.WriteLine("Amu  stiva");
-                        //foreach (var item in stack)
-                        //{ Console.Write(item + ","); }
-                    }                   
-                }
 
-               //daca e string
+                    }
+                }
+                //daca e string
                 else
                 {
-                    var auxCol = nonterminals.IndexOf((char)stack.Pop());                 
-                    int action =Int32.Parse(TS[(int)stack.Peek(), auxCol]);
+                    //cauta in tabela de salt urmatoarea actiune
+                    var auxCol = nonterminals.IndexOf((char)stack.Pop());
+                    int action = Int32.Parse(TS[(int)stack.Peek(), auxCol]);
+                    //si pune pe stiva
                     stack.Push(nonterminals[auxCol]);
                     stack.Push(action);
                 }
@@ -170,5 +170,10 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
             }
 
         }
+
+        //afisare stiva 
+        //Console.WriteLine("Amu  stiva");
+        //foreach (var item in stack)
+        //{ Console.Write(item + ","); }
     }
 }
