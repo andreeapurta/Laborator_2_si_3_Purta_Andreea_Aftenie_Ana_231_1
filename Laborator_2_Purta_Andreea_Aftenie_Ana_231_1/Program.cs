@@ -153,7 +153,6 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
                         stack.Push(production[int.Parse(value[1].ToString()) - 1].Item1);
                         var auxVar = nonterminals.IndexOf(stack.Peek().ToString());
                         stack.Push(int.Parse(TS[peek, auxVar]));
-
                     }
                 }
                 //daca e string
@@ -166,11 +165,8 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
                     stack.Push(nonterminals[auxCol]);
                     stack.Push(action);
                 }
-
             }
-
         }
-
         //afisare stiva 
         //Console.WriteLine("Amu  stiva");
         //foreach (var item in stack)
