@@ -125,7 +125,7 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
                     if (value[0] == 'd')
                     {
                         stack.Push(cuvIntrare[0]);
-                        stack.Push(int.Parse(value[1].ToString()));
+                        stack.Push(int.Parse(value.Substring(1)));
                         cuvIntrare = cuvIntrare.Substring(1, cuvIntrare.Length - 1);
                     }
 
