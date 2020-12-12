@@ -48,18 +48,15 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
 
         public static void Salt(List<(string, string)> I, char x)
         {
-            foreach (var element in I)
+            for (int i = 0; i < I.Count; i++)
             {
-                char firstElementAfterDot = element.Item2[element.Item2.IndexOf('.') + 1];
+                char firstElementAfterDot = I[i].Item2[I[i].Item2.IndexOf('.') + 1];
                 if (firstElementAfterDot == x)
                 {
-                    var index = element.Item2.IndexOf('.');
-                    //swap
-                    var aux = element.Item2[index];
-                    element.Item2.Insert(index+1, aux.ToString());
-                    //element.Item2.Insert(index + 1, aux.ToString());
+                   I[i].Item2.Replace(("." + x), (x + "."));
                 }
             }
+            INC(I, I[0], "ETF");
         }
 
         static void Main(string[] args)
