@@ -15,23 +15,72 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
             return new string(charArray);
         }
 
+
+        //FirstProduction == I
+        public static List<(string, string)> INC(List<(string, string)> production, (string, string) firstProduction, string nonterminals)
+        {
+            List<(string, string)> M = new List<(string, string)>();
+            M.Add(firstProduction);
+            for (int i = 0; i < M.Count; i++)
+            {
+                //caut primul element  de dupa punct din partea dreapta a productiei
+                char firstElementAfterDot = M[i].Item2[M[i].Item2.IndexOf('.') + 1];
+                //daca e neterminal ii bagam productia in multime
+                foreach (var nonterminal in nonterminals)
+                {
+                    if (firstElementAfterDot == nonterminal)
+                    {   //ca sa nu adaug si prima productie adica E+T de exemplu pt ca e bagat la linia 24
+                        var productions = production.Where(j => j.Item1.Equals(firstElementAfterDot.ToString())).ToList();
+                        foreach (var item in productions)
+                        {
+                            if (!M.Contains(item))
+                            {
+                                //gasesc toate productiile pentru elementul de dupa punct
+                                M.Add(item);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return M;
+        }
+
+        public static void Salt(List<(string, string)> I, char x)
+        {
+            foreach (var element in I)
+            {
+                char firstElementAfterDot = element.Item2[element.Item2.IndexOf('.') + 1];
+                if (firstElementAfterDot == x)
+                {
+                    var index = element.Item2.IndexOf('.');
+                    //swap
+                    var aux = element.Item2[index];
+                    element.Item2.Insert(index+1, aux.ToString());
+                    //element.Item2.Insert(index + 1, aux.ToString());
+                }
+            }
+        }
+
         static void Main(string[] args)
         {
+
             Stack stack = new Stack();
             string terminals = "";
             string nonterminals = "";
             var production = new List<(string, string)>();
+            var incCollection = new List<List<(string, string)>>();
             string[,] TS = new string[100, 100];
             string[,] TA = new string[100, 100];
             string cuvIntrare = "";
             int productionLength;
-            int linesTA = 0, colTA = 0, linesTS = 0, colTS = 0;
+            //int linesTA = 0, colTA = 0, linesTS = 0, colTS = 0;
             int indexLine = 1;
             int indexCol = 0;
             string value = "";
 
             //citire fisier
-            using (StreamReader fisier = new StreamReader(@"C:\Users\Andreea Purta\Desktop\Laborator_2_Purta_Andreea_Aftenie_Ana_231_1\Laborator_2_Purta_Andreea_Aftenie_Ana_231_1\textFile.txt"))
+            using (StreamReader fisier = new StreamReader(@"C:\Users\Andreea Purta\Source\Repos\Laborator_2_Purta_Andreea_Aftenie_Ana_231_12\Laborator_2_Purta_Andreea_Aftenie_Ana_231_1\textFile.txt"))
             {
                 nonterminals += fisier.ReadLine();
                 terminals += fisier.ReadLine();
@@ -39,63 +88,46 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
                 for (int i = 0; i < productionLength; i++)
                 {
                     string[] sirImpartit = fisier.ReadLine().Split(" ");
-                    production.Add((sirImpartit[0], sirImpartit[1]));
+                    production.Add((sirImpartit[0], "." + sirImpartit[1]));
                 }
 
-                Int32.TryParse(fisier.ReadLine(), out linesTA);
-                Int32.TryParse(fisier.ReadLine(), out colTA);
-
-                for (int i = 0; i < linesTA; i++)
-                {
-                    string line = fisier.ReadLine();
-                    string[] terms = line.Split(" ");
-                    for (int j = 0; j < colTA; j++)
-                    {
-                        TA[i, j] = terms[j];
-                    }
-                }
-
-                Int32.TryParse(fisier.ReadLine(), out linesTS);
-                Int32.TryParse(fisier.ReadLine(), out colTS);
-
-                for (int i = 0; i < linesTS; i++)
-                {
-                    string lineTS = fisier.ReadLine();
-                    string[] termsTS = lineTS.Split(" ");
-                    for (int j = 0; j < colTS; j++)
-                    {
-                        TS[i, j] = termsTS[j];
-                    }
-                }
                 cuvIntrare += fisier.ReadLine();
             }
+            #region
+            ////afisari
+            //Console.WriteLine(nonterminals);
+            //Console.WriteLine(terminals);
+            //Console.WriteLine("Amu afisam matricea TA");
+            //for (int i = 0; i < linesTA; i++)
+            //{
+            //    for (int j = 0; j < colTA; j++)
+            //    {
+            //        Console.Write(TA[i, j] + "\t");
 
-            //afisari
-            Console.WriteLine(nonterminals);
-            Console.WriteLine(terminals);
-            Console.WriteLine("Amu afisam matricea TA");
-            for (int i = 0; i < linesTA; i++)
+            //    }
+            //    Console.WriteLine();
+            //}
+
+            //Console.WriteLine("Amu afisam matricea TS");
+            //for (int i = 0; i < linesTS; i++)
+            //{
+            //    for (int j = 0; j < colTS; j++)
+            //    {
+            //        Console.Write(TS[i, j] + "\t");
+
+            //    }
+            //    Console.WriteLine();
+            //}
+            //Console.WriteLine("Amu afisam cuvant intrari " + cuvIntrare);
+            #endregion
+
+
+            //
+            for (int i = 0; i < incCollection.Count; i++)
             {
-                for (int j = 0; j < colTA; j++)
-                {
-                    Console.Write(TA[i, j] + "\t");
-
-                }
-                Console.WriteLine();
+                incCollection.Add(INC(production, production[i], nonterminals));
             }
-
-            Console.WriteLine("Amu afisam matricea TS");
-            for (int i = 0; i < linesTS; i++)
-            {
-                for (int j = 0; j < colTS; j++)
-                {
-                    Console.Write(TS[i, j] + "\t");
-
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine("Amu afisam cuvant intrari " + cuvIntrare);
-
+            Salt(INC(production, production[0], nonterminals), 'E');
             //initializare stiva cu $ si 0
             stack.Push('$');
             stack.Push(0);
