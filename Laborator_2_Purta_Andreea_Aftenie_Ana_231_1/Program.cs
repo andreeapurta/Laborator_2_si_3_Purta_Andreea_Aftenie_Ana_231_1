@@ -31,7 +31,7 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
             string value = "";
 
             //citire fisier
-            using (StreamReader fisier = new StreamReader(@"C:\Users\Andreea Purta\Desktop\Laborator_2_Purta_Andreea_Aftenie_Ana_231_1\Laborator_2_Purta_Andreea_Aftenie_Ana_231_1\textFile.txt"))
+            using (StreamReader fisier = new StreamReader(@"C:\Users\Andreea Purta\source\repos\Laborator_2_Purta_Andreea_Aftenie_Ana_231_12\Laborator_2_Purta_Andreea_Aftenie_Ana_231_1\textFile.txt"))
             {
                 nonterminals += fisier.ReadLine();
                 terminals += fisier.ReadLine();
