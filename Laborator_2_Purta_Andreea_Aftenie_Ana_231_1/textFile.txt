@@ -1,10 +1,12 @@
 ﻿ETF
 a+*()$
-6
+E'
+7
+E' E
 E E+T
 E T
 T T*F
 T F
 F (E)
 F a
-a+(a+a)*a$
+a+a*a$

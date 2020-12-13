@@ -15,7 +15,6 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
             return new string(charArray);
         }
 
-
         //FirstProduction == I
         public static List<(string, string)> INC(List<(string, string)> production, List<(string, string)> startProductions, string nonterminals)
         {
@@ -23,30 +22,32 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
             M.AddRange(startProductions);
             for (int i = 0; i < M.Count; i++)
             {
-                //caut primul element  de dupa punct din partea dreapta a productiei
-                char firstElementAfterDot = M[i].Item2[M[i].Item2.IndexOf('.') + 1];
-                //daca e neterminal ii bagam productia in multime
-                foreach (var nonterminal in nonterminals)
+                if (M[i].Item2.IndexOf('.') + 1 < M[i].Item2.Length)
                 {
-                    if (firstElementAfterDot == nonterminal)
-                    {   //ca sa nu adaug si prima productie adica E+T de exemplu pt ca e bagat la linia 24
-                        var productions = production.Where(j => j.Item1.Equals(firstElementAfterDot.ToString())).ToList();
-                        foreach (var item in productions)
-                        {
-                            if (!M.Contains(item))
+                    //caut primul element  de dupa punct din partea dreapta a productiei
+                    char firstElementAfterDot = M[i].Item2[M[i].Item2.IndexOf('.') + 1];
+                    //daca e neterminal ii bagam productia in multime
+                    foreach (var nonterminal in nonterminals)
+                    {
+                        if (firstElementAfterDot == nonterminal)
+                        {   //ca sa nu adaug si prima productie adica E+T de exemplu pt ca e bagat la linia 24
+                            var productions = production.Where(j => j.Item1.Equals(firstElementAfterDot.ToString())).ToList();
+                            foreach (var item in productions)
                             {
-                                //gasesc toate productiile pentru elementul de dupa punct
-                                M.Add(item);
+                                if (!M.Contains(item))
+                                {
+                                    //gasesc toate productiile pentru elementul de dupa punct
+                                    M.Add(item);
+                                }
                             }
                         }
                     }
                 }
             }
-
             return M;
         }
 
-        public static void GenerateCollection(List<(string, string)> productions, string nonterminals)
+        public static void GenerateCollection(List<(string, string)> productions, string start, string terminals, string nonterminals)
         {
             //retine ce  I s o generat din ce functie de salt  (de ex I0 si E == I1, I7 si ( == I4)
             List<Tuple<int, char, int>> f = new List<Tuple<int, char, int>>();
@@ -89,39 +90,73 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
                     }
                 }
             }
+            GenerateTSAndTA(collections, productions, f, start, terminals, nonterminals);
         }
 
-        public static void GenerateTSAndTA(List<List<(string, string)>> collections, string terminals, string nonterminals)
+        public static void GenerateTSAndTA(List<List<(string, string)>> collections, List<(string, string)> productions, List<Tuple<int, char, int>> f, string start, string terminals, string nonterminals)
         {
-            string[,] TS = [100, 100];
+            List<Tuple<int, int, string>> TS = new List<Tuple<int, int, string>>();
+            List<Tuple<int, int, string>> TA = new List<Tuple<int, int, string>>();
+            List<(string, string)> P = new List<(string, string)>(productions);
+
+            for (int i = 0; i < P.Count; i++)
+            {
+                var x = P[i];
+                x.Item2 = P[i].Item2.Remove(P[i].Item2.IndexOf('.'), 1);
+                P[i] = x;
+            }
+
             foreach (var item in collections)
             {
                 //fiecare productie din colectie
                 foreach (var i in item)
                 {
-                    var character = i.Item2[i.Item2.IndexOf('.') + 1];
-                    if (character < i.Item2.Length) //daca punctul nu e la final
+
+                    if (i.Item2.IndexOf('.') + 1 < i.Item2.Length) //daca punctul nu e la final
                     {
+                        var character = i.Item2[i.Item2.IndexOf('.') + 1];
+                        //iau functia care am generat-o cu ajutorul i-ului curent din colectie si caracter 
+                        var column = f.FirstOrDefault(x => x.Item1.Equals(collections.IndexOf(item)) && x.Item2.Equals(character));
                         if (nonterminals.Contains(character))//daca e neterminal
                         {
-                           
+                            //numarul la I ul rezultat e elementul din matrice
+                            //TS[collections.IndexOf(item), nonterminals.IndexOf(character)] = column.Item3.ToString();
+                            TS.Add(new Tuple<int, int, string>(collections.IndexOf(item), nonterminals.IndexOf(character), column.Item3.ToString()));
                         }
                         else if (terminals.Contains(character))
                         {
-
+                            TA.Add(new Tuple<int, int, string>(collections.IndexOf(item), terminals.IndexOf(character), "d" + column.Item3.ToString()));
+                            //TA[collections.IndexOf(item), terminals.IndexOf(character)] = "d" + column.Item3.ToString();
                         }
-                    }                   
+                    }
                     else
                     {
+                        //aici stergem punctul din fiecare productie
+                        var production = i;
+                        var index = production.Item2.IndexOf('.'); //pozitia elementului punctului.
+                        production.Item2 = production.Item2.Remove(index, 1);
+                        var productionIndex = P.IndexOf(production);
+                        foreach (var x in URM(P, start, production.Item1, terminals, nonterminals))
+                        {
+                            if (production.Item1.Equals(start))
+                            {
+                                //TA[collections.IndexOf(item), terminals.IndexOf(x)] = "acc";
+                                TA.Add(new Tuple<int, int, string>(collections.IndexOf(item), terminals.IndexOf(x), "acc"));
+                            }
+                            else
+                            {
+                                //TA[collections.IndexOf(item), terminals.IndexOf(x)] = "r" + productionIndex.ToString();
+                                TA.Add(new Tuple<int, int, string>(collections.IndexOf(item), terminals.IndexOf(x), "r" + productionIndex.ToString()));
+                            }
+                        }
 
                     }
                 }
             }
+            AfisareTSSiTA(TS, TA, terminals);
         }
 
-
-
-        public List<string> URM(List<(string, string)> productions, string start, string caracter, string terminals, string nonterminals)
+        public static List<string> URM(List<(string, string)> productions, string start, string caracter, string terminals, string nonterminals)
         {
             var productii = productions.Where(x => x.Item2.Contains(caracter)).ToList();
             var urm = new List<string>();
@@ -146,7 +181,7 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
             return urm.Distinct().ToList();
         }
 
-        public List<string> PRIM(List<(string, string)> productions, string caracter, string nonterminals, string terminals)
+        public static List<string> PRIM(List<(string, string)> productions, string caracter, string nonterminals, string terminals)
         {
             //iau toate productiile care se deriveaza din caracter 
             var productii = productions.Where(x => x.Item1.Equals(caracter)).ToList();
@@ -187,26 +222,37 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
             return INC(production, result, nonterminals);
         }
 
-        static void Main(string[] args)
+        public static void AfisareTSSiTA(List<Tuple<int, int, string>> TS, List<Tuple<int, int, string>> TA, string terminals)
         {
 
-            Stack stack = new Stack();
+            foreach (var item in TA.Distinct())
+            {
+                Console.WriteLine("L:" + item.Item1 + " C:" + item.Item2 + " " + item.Item3); ;
+            }
+            Console.WriteLine();
+
+            foreach (var item in TS.Distinct())
+            {
+                Console.WriteLine("L:" + item.Item1 + " C:" + item.Item2 + " " + item.Item3);
+            }
+
+        }
+
+        static void Main(string[] args)
+        {
             string terminals = "";
             string nonterminals = "";
             var production = new List<(string, string)>();
             var incCollection = new List<List<(string, string)>>();
             string cuvIntrare = "";
             int productionLength;
-            //int linesTA = 0, colTA = 0, linesTS = 0, colTS = 0;
-            int indexLine = 1;
-            int indexCol = 0;
-            string value = "";
-            string start = ""; // de ex E
+            string start = "";
             //citire fisier
             using (StreamReader fisier = new StreamReader(@"C:\Users\Andreea Purta\Source\Repos\Laborator_2_Purta_Andreea_Aftenie_Ana_231_12\Laborator_2_Purta_Andreea_Aftenie_Ana_231_1\textFile.txt"))
             {
                 nonterminals += fisier.ReadLine();
                 terminals += fisier.ReadLine();
+                start += fisier.ReadLine();
                 Int32.TryParse(fisier.ReadLine(), out productionLength);
                 for (int i = 0; i < productionLength; i++)
                 {
@@ -216,108 +262,7 @@ namespace Laborator_2_Purta_Andreea_Aftenie_Ana_231_1
 
                 cuvIntrare += fisier.ReadLine();
             }
-            #region
-            ////afisari
-            //Console.WriteLine(nonterminals);
-            //Console.WriteLine(terminals);
-            //Console.WriteLine("Amu afisam matricea TA");
-            //for (int i = 0; i < linesTA; i++)
-            //{
-            //    for (int j = 0; j < colTA; j++)
-            //    {
-            //        Console.Write(TA[i, j] + "\t");
-
-            //    }
-            //    Console.WriteLine();
-            //}
-
-            //Console.WriteLine("Amu afisam matricea TS");
-            //for (int i = 0; i < linesTS; i++)
-            //{
-            //    for (int j = 0; j < colTS; j++)
-            //    {
-            //        Console.Write(TS[i, j] + "\t");
-
-            //    }
-            //    Console.WriteLine();
-            //}
-            //Console.WriteLine("Amu afisam cuvant intrari " + cuvIntrare);
-            #endregion
-
-            //initializare stiva cu $ si 0
-            //    stack.Push('$');
-            //    stack.Push(0);
-
-            //    bool acc = false;
-            //    while (!acc)
-            //    {
-            //        ///daca e int
-            //        if (stack.Peek().GetType() == typeof(int))
-            //        {
-            //            indexLine = (int)(stack.Peek());
-            //            indexCol = terminals.IndexOf(cuvIntrare[0]);
-            //            value = TA[indexLine, indexCol];
-
-            //            if (value.Equals("acc"))
-            //            {
-            //                Console.WriteLine("Amu apartine gramaticii!! :)");
-            //                acc = true;
-            //            }
-
-            //            if (value.Equals("0"))
-            //            {
-            //                Console.WriteLine("Amu Nu apartine gramaticii! :(");
-            //                return;
-            //            }
-
-            //            if (value[0] == 'd')
-            //            {
-            //                stack.Push(cuvIntrare[0]);
-            //                stack.Push(int.Parse(value.Substring(1)));
-            //                cuvIntrare = cuvIntrare.Substring(1, cuvIntrare.Length - 1);
-            //            }
-
-            //            else if (value[0] == 'r')
-            //            {
-            //                string auxStack = "";
-            //                //parcurgem stiva (Care am facut o array)
-            //                foreach (var item in stack.ToArray())
-            //                {
-            //                    stack.Pop();
-            //                    //daca in stiva e caracter atunci adaug in sir
-            //                    if (item.GetType() == typeof(char) || item.GetType() == typeof(string))
-            //                    {
-            //                        auxStack += item;
-            //                        var altavar = production[int.Parse(value[1].ToString()) - 1].Item2;
-            //                        //daca am gasit in stiva elementul de la care se face reducere se opreste daca nu tot scoate din stiva
-            //                        if (Reverse(auxStack).Equals(altavar))
-            //                        {
-            //                            break;
-            //                        }
-            //                    }
-            //                }
-
-            //                var peek = (int)(stack.Peek());
-            //                stack.Push(production[int.Parse(value[1].ToString()) - 1].Item1);
-            //                var auxVar = nonterminals.IndexOf(stack.Peek().ToString());
-            //                stack.Push(int.Parse(TS[peek, auxVar]));
-            //            }
-            //        }
-            //        //daca e string
-            //        else
-            //        {
-            //            //cauta in tabela de salt urmatoarea actiune
-            //            var auxCol = nonterminals.IndexOf((char)stack.Pop());
-            //            int action = Int32.Parse(TS[(int)stack.Peek(), auxCol]);
-            //            //si pune pe stiva
-            //            stack.Push(nonterminals[auxCol]);
-            //            stack.Push(action);
-            //        }
-            //    }
+            GenerateCollection(production, start, terminals, nonterminals);
         }
-        //afisare stiva 
-        //Console.WriteLine("Amu  stiva");
-        //foreach (var item in stack)
-        //{ Console.Write(item + ","); }
     }
 }
